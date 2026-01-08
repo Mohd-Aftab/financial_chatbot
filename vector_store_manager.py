@@ -15,5 +15,5 @@ pdf_paths = [
 vector_store = ingest_multiple_pdfs(
     filePath=pdf_paths,
     company="Tata Motors",
-    ticker="TATAMOTORS",
+    ticker="TMPV.NS",
 )

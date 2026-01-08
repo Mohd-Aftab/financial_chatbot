@@ -32,20 +32,6 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 class FinanceState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
-
-
-
-def rag_node(state: FinanceState):
-    """
-    Force retrieval after ingestion before final answer.
-    """
-    # Re-run LLM but now it MUST see updated vector store
-    messages = state["messages"]
-    response = llm_with_tools.invoke(messages)
-
-    return {
-        "messages": [response]
-    }
     
 conn = sqlite3.connect(database="financebot.db", check_same_thread=False)
 # Checkpointer

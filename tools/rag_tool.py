@@ -1,61 +1,52 @@
 from langchain_core.tools import tool
-
 from vector_store_manager import vector_store
-
 from langchain_core.runnables import RunnableConfig
 
 @tool
-def rag_tool(query: str, config:RunnableConfig) -> dict:
+def rag_tool(query: str, ticker: str, config: RunnableConfig) -> dict:
     """
-    Retrieve contextually relevant information using a Retrieval-Augmented
-    Generation (RAG) pipeline built from company earnings call transcripts
-    and recently ingested news articles.
-
-    This tool searches a FAISS vector store that may contain:
-      1) Earnings call transcript documents
-         - management commentary
-         - analyst Q&A discussions
-      2) News articles related to one or more companies
-         - recent developments and announcements
-         - partnerships, launches, and regulatory updates
-         - macroeconomic or industry events impacting companies
-
-    The tool is intended for answering qualitative, explanatory, and
-    context-driven questions such as:
-      - company strategy, outlook, and guidance
-      - key risks and challenges discussed by leadership
-      - growth drivers and long-term vision
-      - explanations behind recent performance or decisions
-      - how recent news events may impact a company’s future direction
-
-    The tool retrieves information only from the existing vector store
-    available in the current LangGraph state. It does NOT:
-      - fetch live or real-time data
-      - trigger news ingestion or external API calls
-      - compute structured financial metrics such as prices, revenues,
-        ratios, or tabular financial statements
+    Retrieve contextually relevant information using a RAG pipeline.
+    
+    Args:
+        query: The user's search query.
+        ticker: The stock ticker symbol (e.g., "AAPL", "NVDA"). 
+                Must match the ticker used during data ingestion.
     """
     
+    # DEBUG: Print what the bot is searching for
+    print(f"🔍 RAG Tool Search - Query: '{query}' | Ticker: '{ticker}'")
+
     thread_id = config["configurable"].get("thread_id")
     
-    search_filter = {"thread_id": thread_id}
+    def metadata_filter(metadata):
+        # 1. Allow thread-specific documents (private context)
+        if metadata.get("thread_id") == thread_id:
+            return True
+        
+        # 2. For shared public data, check Ticker (CASE INSENSITIVE)
+        if metadata.get("data_type") in ["earnings_call", "news"]:
+            stored_ticker = metadata.get("ticker", "")
+            # Normalize both to uppercase for comparison
+            return stored_ticker.upper() == ticker.upper()
+            
+        return False
 
     retriever = vector_store.as_retriever(
         search_type="similarity",
         search_kwargs={
             "k": 4, 
-            "filter": lambda metadata: (
-              metadata.get("thread_id") == thread_id 
-              or metadata.get("data_type") == "earnings_call"
-              or metadata.get("data_type") == "news"
-            )
+            "filter": metadata_filter
         }
     )
 
     result = retriever.invoke(query)
+    
+    # DEBUG: Print how many docs were found
+    print(f"✅ Found {len(result)} documents for {ticker}")
 
     return {
         "query": query,
+        "ticker": ticker,
         "context": [doc.page_content for doc in result],
         "metadata": [doc.metadata for doc in result],
     }

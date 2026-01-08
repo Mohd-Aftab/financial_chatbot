@@ -1,0 +1,7 @@
+[
+  {
+    "input": "According to the News related to Apple summarise the recent news for Apple.",
+    "expected_output": "Recent news highlights App Store engagement (popular games like Balatro) and a legal victory regarding web-based purchasing commissions, though the latter requires establishing a fair rate before implementation.",
+    "category": "Positive Test / News Summarization"
+  }
+]
