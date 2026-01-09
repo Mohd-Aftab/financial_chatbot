@@ -10,22 +10,7 @@ from langchain_core.messages import (
 )
 
 from vector_store_manager import vector_store
-
-
-# ---------------- System Prompt ----------------
-
-SYSTEM_PROMPT = """
-You are a professional financial analyst specializing in stock markets, company fundamentals,
-earnings, and market-moving news.
-
-When the user asks about trends, stock movement, reasons, or specific news, you must:
-- Plan required tool calls internally
-- Execute tools silently
-- Use RAG before answering
-- Output only a final, concise answer
-
-Do not produce intermediate messages such as 'Let me check'.
-"""
+from utils.prompts import SYSTEM_PROMPT
 
 
 # ---------------- Utils ----------------

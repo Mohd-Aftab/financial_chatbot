@@ -1,47 +1,87 @@
 from langchain_core.tools import tool
 from data_ingestion.auto_news_pipeline import auto_ingest_company_news
+from vector_store_manager import vector_store
 from dotenv import load_dotenv
-
 import os
+
 load_dotenv()
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
+
 @tool
-def ingest_company_news(
-    company_query: str,
-) -> dict:
+def ingest_company_news(company_query: str) -> dict:
     """
-    Ingest recent news articles for a specified company into the vector store.
-
-    This tool performs a full automated news ingestion pipeline:
-        1) Resolves the canonical company name and official stock ticker
-            from a user-provided company reference (e.g. "Tesla", "Tesla Motors").
-        2) Fetches recent news articles related to the company from NewsAPI.
-        3) Extracts full article content from each news URL.
-        4) Embeds and stores the processed news content into the existing
-            vector store used by the RAG pipeline.
-
-    The vector store is retrieved from the current LangGraph state,
-    updated in-place with newly ingested news documents, and written
-    back to the state.
-
-    Intended use cases:
-        - When the user asks about recent news, current events, or developments
-        affecting a company.
-        - To ensure the RAG system has up-to-date contextual information
-        before answering qualitative questions.
-
-    This tool does NOT:
-        - Return news content directly to the user.
-        - Perform live financial data queries (prices, ratios, metrics).
-        - Answer user questions by itself.
+    Ingest recent news articles for any company into the vector store.
+    
+    This tool:
+    1. Resolves the company name to canonical form and ticker
+    2. Handles ambiguous company references (e.g., "Tata" → asks for clarification)
+    3. Fetches recent news from NewsAPI
+    4. Embeds and stores news in the vector store with rich metadata
+    5. Prevents duplicate ingestion
+    
+    Use this tool when:
+    - User asks about recent news or current events for a company
+    - You need up-to-date context before answering qualitative questions
+    - User wants to know "what's happening" with a company
+    
+    After successful ingestion, you MUST use rag_tool to retrieve
+    and summarize the news for the user.
+    
+    Parameters:
+    - company_query: Company name (e.g., "Tesla", "Tata Consumer Products", "TCS")
+    
+    Returns:
+    - Status of ingestion with details about articles added
+    - If ambiguous, returns list of candidates for clarification
     """
-    auto_ingest_company_news(
+    
+    result = auto_ingest_company_news(
         company_query=company_query,
         news_api_key=NEWS_API_KEY,
+        existing_vector_store=vector_store
     )
-    # 2. NEW: Retrieve the top articles to return to the LLM immediately
-    # We can quickly fetch the added articles from the vector store or return a simple summary
-    # For simplicity, let's return a prompt forcing the LLM to check the store.
     
-    return f"Successfully ingested news for {company_query}. NOW, you must use the rag_tool to retrieve these articles and summarize them for the user."
+    # Format response based on status
+    if result["status"] == "success":
+        return {
+            "status": "success",
+            "message": f"✅ Successfully ingested {result['articles_ingested']} news articles for {result['company']} ({result['ticker']}). NOW use rag_tool to retrieve and summarize these articles.",
+            "company": result["company"],
+            "ticker": result["ticker"],
+            "articles_count": result["articles_ingested"],
+            "next_action": "Use rag_tool to retrieve these articles"
+        }
+    
+    elif result["status"] == "ambiguous":
+        return {
+            "status": "needs_clarification",
+            "message": result["message"],
+            "candidates": result["candidates"],
+            "next_action": "Ask user to specify which company they mean"
+        }
+    
+    elif result["status"] == "no_news":
+        return {
+            "status": "no_news",
+            "message": f"No recent news found for {result['company']}. This might mean:\n- Company is not in major news currently\n- NewsAPI limits reached\n- Company name not well-known in news sources",
+            "company": result["company"],
+            "ticker": result["ticker"],
+            "next_action": "Inform user and offer to check stock price or earnings data instead"
+        }
+    
+    elif result["status"] == "already_ingested":
+        return {
+            "status": "already_current",
+            "message": f"News for {result['company']} is already up to date. Use rag_tool to retrieve existing news.",
+            "company": result["company"],
+            "ticker": result["ticker"],
+            "next_action": "Use rag_tool to retrieve existing news"
+        }
+    
+    else:  # error
+        return {
+            "status": "error",
+            "message": result.get("message", "Unknown error during news ingestion"),
+            "next_action": "Inform user and suggest alternative approaches"
+        }
