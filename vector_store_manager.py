@@ -15,6 +15,6 @@ pdf_paths = [
 # For now, we ensure the existing Tata PDFs get the "Tata Motors" tag.
 vector_store = ingest_multiple_pdfs(
     filePath=pdf_paths,
-    company="Tata consumers products", # <--- This metadata is what the RAG tool filters on
+    company="Tata consumer products Limited", # <--- This metadata is what the RAG tool filters on
     ticker="TMPV.NS",
 )
