@@ -4,18 +4,6 @@ from data_ingestion.earning_retriever import ingest_multiple_pdfs
 
 EARNINGS_DIR = "earning_calls"
 
-def get_vector_store():
-    # You might load an existing index here instead of re-ingesting every time
-    # For now, we keep your logic but make it cleaner
-    pass 
-
-# TEMPORARY: Multi-company Ingestion Setup
-# You can map folder names to company tickers here
-company_map = [
-    {"company": "Tata Motors", "ticker": "TMPV.NS", "file_prefix": "tata"},
-    # {"company": "Tesla", "ticker": "TSLA", "file_prefix": "tesla"}, # Uncomment when you have files
-]
-
 # Collect all paths (this is still simple/hardcoded for your current setup)
 pdf_paths = [
     os.path.join(EARNINGS_DIR, file)
