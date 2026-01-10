@@ -4,14 +4,13 @@ from typing import TypedDict, Annotated
 from langgraph.graph.message import add_messages
 
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, AIMessage
 from langchain_core.tools import tool
 from langgraph.prebuilt import ToolNode, tools_condition
 from dotenv import load_dotenv
 
 from vector_store_manager import vector_store
 
-# Import improved tools
 from tools.rag_tool import rag_tool, check_data_availability
 from tools.news_ingestion_tool import ingest_company_news
 from tools.stock_price_tool import get_stock_price, compare_stock_prices

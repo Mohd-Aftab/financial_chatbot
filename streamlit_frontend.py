@@ -146,8 +146,15 @@ if user_input:
                 config=CONFIG,
                 stream_mode="messages",
             ):
+                # ❌ Ignore tool outputs completely
+                if metadata.get("langgraph_node") == "tools":
+                    continue
+
                 if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
+                    if message_chunk.content.strip().startswith("{"):
+                        continue
                     yield message_chunk.content
+
 
         streamed_text = st.write_stream(stream_generator())
 
