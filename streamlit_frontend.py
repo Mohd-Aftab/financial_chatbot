@@ -9,7 +9,7 @@ from langchain_core.messages import (
     AIMessageChunk,
 )
 
-from vector_store_manager import vector_store
+from vector_store_manager import final_vector_store
 from utils.prompts import SYSTEM_PROMPT
 
 
@@ -139,6 +139,11 @@ if user_input:
     }
 
     with st.chat_message("assistant"):
+        # Loader placeholder
+        loader_placeholder = st.empty()
+        loader_placeholder.markdown("⏳ *Thinking...*")
+
+        first_token = [True]  # mutable container
 
         def stream_generator():
             for message_chunk, metadata in chatbot.stream(
@@ -146,17 +151,23 @@ if user_input:
                 config=CONFIG,
                 stream_mode="messages",
             ):
-                # ❌ Ignore tool outputs completely
+                # Ignore tool outputs
                 if metadata.get("langgraph_node") == "tools":
                     continue
 
                 if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
                     if message_chunk.content.strip().startswith("{"):
                         continue
+
+                    # Remove loader on first real token
+                    if first_token[0]:
+                        loader_placeholder.empty()
+                        first_token[0] = False
+
                     yield message_chunk.content
 
-
         streamed_text = st.write_stream(stream_generator())
+
 
     # Save assistant response
     st.session_state.message_history.append(

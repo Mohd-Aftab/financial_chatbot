@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
-from vector_store_manager import vector_store
+from vector_store_manager import final_vector_store
 from typing import Optional
 from utils.company_resolver import resolve_company
 
@@ -15,50 +15,58 @@ def extract_company_from_query(query: str) -> Optional[str]:
         resolved, candidates = resolve_company(query, auto_select=True)
         
         if resolved:
-            return resolved.canonical_name
+            return (resolved.canonical_name, resolved.ticker)
         
-        return None
+        return None, None
     except Exception as e:
         print(f"Company extraction failed: {e}")
-        return None
+        return None, None
 
 
 def build_metadata_filter(
     company_name: Optional[str] = None,
+    ticker: Optional[str] = None,
     data_types: Optional[list[str]] = None,
     thread_id: Optional[str] = None
 ):
     """
     Build a metadata filter function for FAISS retrieval.
-    
-    This ensures:
-    - Only documents for the specified company are retrieved
-    - Only specified data types are included (news, earnings_call)
-    - Thread-specific data is included when available
+
+    Ensures:
+    - Thread-specific temporary data is always included
+    - Strict ticker-based filtering when provided
+    - Company-based filtering as fallback
+    - Data-type filtering (news, earnings_call, etc.)
     """
-    
+
     def filter_fn(metadata: dict) -> bool:
-        # Always include thread-specific temporary data
+        # 1️⃣ Always include thread-specific temporary data
         if thread_id and metadata.get("thread_id") == thread_id:
             return True
-        
-        # Check company match (CRITICAL: prevents cross-contamination)
+
+        # 2️⃣ Ticker-based filtering (STRICT & preferred)
+        if ticker:
+            doc_ticker = metadata.get("ticker", "")
+            if doc_ticker != ticker:
+                return False
+
+        # 3️⃣ Company-based filtering (fallback / additional safety)
         if company_name:
             doc_company = metadata.get("company", "").lower()
             query_company = company_name.lower()
-            
-            # Exact match or substring match
+
+            # Allow substring or exact match
             if query_company not in doc_company and doc_company not in query_company:
                 return False
-        
-        # Check data type
+
+        # 4️⃣ Data-type filtering
         if data_types:
             doc_type = metadata.get("data_type")
             if doc_type not in data_types:
                 return False
-        
+
         return True
-    
+
     return filter_fn
 
 
@@ -77,17 +85,20 @@ def rag_tool(query: str, config: RunnableConfig) -> dict:
     thread_id = config["configurable"].get("thread_id")
     
     # Step 1: Identify which company is being asked about
-    company_name = extract_company_from_query(query)
+    company_name, ticker = extract_company_from_query(query)
+    
+    print(f"Resolved company: {company_name}, Ticker: {ticker}")
     
     # Step 2: Build smart filter
     filter_fn = build_metadata_filter(
         company_name=company_name,
+        ticker=ticker,
         data_types=["earnings_call", "news"],
         thread_id=thread_id
     )
     
     # Step 3: Retrieve with filtering
-    retriever = vector_store.as_retriever(
+    retriever = final_vector_store.as_retriever(
         search_type="similarity",
         search_kwargs={
             "k": 5,  # Increased from 4 to get more context
@@ -169,7 +180,7 @@ def check_data_availability(company_name: str, config: RunnableConfig) -> dict:
         thread_id=thread_id
     )
     
-    retriever = vector_store.as_retriever(
+    retriever = final_vector_store.as_retriever(
         search_type="similarity",
         search_kwargs={
             "k": 20,  # Get more docs to check

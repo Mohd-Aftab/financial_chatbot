@@ -1,10 +1,11 @@
 from langchain_core.tools import tool
 import yfinance as yf
-from typing import Optional
+from datetime import datetime
+from yahooquery import search
+
 
 from utils.company_resolver import resolve_company
-
-
+from utils.parsed_date_format import parse_date_string
 
 def is_likely_ticker(text: str) -> bool:
     """
@@ -37,18 +38,24 @@ def get_stock_price(
     - Company names (e.g., "Tesla", "Tata Consumer Products")
     - Ticker symbols (e.g., "TSLA", "TATACONSUM.NS")
     - Ambiguous references (e.g., "Tata" → suggests specific company)
+    - Date ranges (e.g., "last year", "2024-01-01", "January 1, 2024")
     
     The tool will:
     1. Determine if input is a ticker or company name
     2. If company name, resolve to correct ticker using LLM
     3. Verify ticker exists in yfinance
-    4. Fetch and return price data
+    4. Parse and convert dates to proper format
+    5. Fetch and return price data
     
     Parameters:
     - query: Company name or ticker symbol
-    - period: Time period (e.g., "1d", "5d", "1mo", "1y")
-    - start_date: Start date for historical data (YYYY-MM-DD)
-    - end_date: End date for historical data (YYYY-MM-DD)
+    - period: Time period (e.g., "1d", "5d", "1mo", "1y") - used if no dates provided
+    - start_date: Start date - accepts many formats:
+        - "YYYY-MM-DD" (e.g., "2024-01-09")
+        - "last year", "1 year ago"
+        - "last month", "1 month ago"
+        - "January 9, 2024"
+    - end_date: End date (same formats as start_date, defaults to today if not provided)
     
     Returns dict with price data or error message with suggestions.
     """
@@ -56,23 +63,40 @@ def get_stock_price(
     ticker_symbol = None
     company_name = None
     
-    # Step 1: Determine if input is ticker or company name
-    if is_likely_ticker(query):
-        # Likely a ticker symbol - try to use directly
-        ticker_symbol = query.upper()
-        company_name = query  # Fallback
+    print("Searching for:", query)
+    
+    # Fixed: Add proper error handling for yahooquery search
+    try:
+        ticker01 = search(query)
         
-        # Quick validation
-        try:
-            test_ticker = yf.Ticker(ticker_symbol)
-            info = test_ticker.info
-            if info and 'symbol' in info:
-                company_name = info.get('longName', info.get('shortName', query))
-            else:
-                # Invalid ticker, try resolving as company name
-                ticker_symbol = None
-        except:
+        # Check if search returned results with quotes
+        if ticker01 and "quotes" in ticker01 and len(ticker01["quotes"]) > 0:
+            print("Search results:", ticker01["quotes"][0]["symbol"])
+            query = ticker01["quotes"][0]["symbol"]
+        else:
+            print("No search results found, using original query:", query)
+    except Exception as e:
+        print(f"Search error (using original query): {e}")
+        # Continue with original query if search fails
+    
+    # Step 1: Determine if input is ticker or company name
+    # if is_likely_ticker(query):
+    # Likely a ticker symbol - try to use directly
+    print("INPUT TICKER OF QUERY:", query)
+    ticker_symbol = query.upper()
+    company_name = query  # Fallback
+    
+    # Quick validation
+    try:
+        test_ticker = yf.Ticker(ticker_symbol)
+        info = test_ticker.info
+        if info and 'symbol' in info:
+            company_name = info.get('longName', info.get('shortName', query))
+        else:
+            # Invalid ticker, try resolving as company name
             ticker_symbol = None
+    except:
+        ticker_symbol = None
     
     # Step 2: If not a valid ticker, resolve as company name
     if not ticker_symbol:
@@ -110,15 +134,42 @@ def get_stock_price(
                 "suggestion": "Please check the spelling or try using the official ticker symbol."
             }
     
-    # Step 3: Fetch stock price using resolved ticker
+    # Step 3: Parse dates if provided
+    parsed_start_date = None
+    parsed_end_date = None
+    
+    if start_date:
+        parsed_start_date = parse_date_string(start_date)
+        if not parsed_start_date:
+            return {
+                "error": "invalid_date",
+                "message": f"Could not parse start date: '{start_date}'",
+                "suggestion": "Use format like '2024-01-09' or 'last year' or 'January 9, 2024'"
+            }
+    
+    if end_date:
+        parsed_end_date = parse_date_string(end_date)
+        if not parsed_end_date:
+            return {
+                "error": "invalid_date",
+                "message": f"Could not parse end date: '{end_date}'",
+                "suggestion": "Use format like '2024-01-09' or 'today' or 'January 9, 2024'"
+            }
+    
+    # If start_date provided but no end_date, default to today
+    if parsed_start_date and not parsed_end_date:
+        parsed_end_date = datetime.now().strftime('%Y-%m-%d')
+    
+    # Step 4: Fetch stock price using resolved ticker
     try:
         ticker = yf.Ticker(ticker_symbol)
         
         # Get historical data
-        if start_date:
-            df = ticker.history(start=start_date, end=end_date)
+        if parsed_start_date:
+            df = ticker.history(start=parsed_start_date, end=parsed_end_date)
         else:
             df = ticker.history(period=period or "5d", interval="1d")
+        
         
         if df.empty:
             return {
@@ -126,35 +177,36 @@ def get_stock_price(
                 "symbol": ticker_symbol,
                 "company": company_name,
                 "message": f"No price data found for {company_name} ({ticker_symbol})",
-                "suggestion": "The ticker might be delisted or data might be unavailable for the specified period."
+                "suggestion": "The ticker might be delisted or data might be unavailable for the specified period.",
+                "date_range": f"{parsed_start_date} to {parsed_end_date}" if parsed_start_date else None
             }
         
         latest = df.iloc[-1]
+        first = df.iloc[0]
         
-        # Calculate change if we have multiple days
-        change = None
-        change_percent = None
-        if len(df) > 1:
-            previous = df.iloc[-2]["Close"]
-            current = latest["Close"]
-            change = float(current - previous)
-            change_percent = float((change / previous) * 100)
+        # Calculate change from first to latest in the period
+        change = float(latest["Close"] - first["Close"])
+        change_percent = float((change / first["Close"]) * 100)
         
         result = {
             "success": True,
             "company": company_name,
             "symbol": ticker_symbol,
-            "price": float(latest["Close"]),
-            "date": str(df.index[-1].date()),
-            "open": float(latest["Open"]),
+            "current_price": float(latest["Close"]),
+            "current_date": str(df.index[-1].date()),
+            "period_start_price": float(first["Close"]),
+            "period_start_date": str(df.index[0].date()),
+            "change": round(change, 2),
+            "change_percent": round(change_percent, 2),
             "high": float(latest["High"]),
             "low": float(latest["Low"]),
             "volume": int(latest["Volume"]),
         }
         
-        if change is not None:
-            result["change"] = round(change, 2)
-            result["change_percent"] = round(change_percent, 2)
+        # Add period info if date range was used
+        if parsed_start_date:
+            result["date_range"] = f"{df.index[0].date()} to {df.index[-1].date()}"
+            result["days_in_period"] = len(df)
         
         return result
     
@@ -198,10 +250,10 @@ def compare_stock_prices(
     
     if len(successful_results) > 1:
         # Add relative performance comparison
-        baseline = successful_results[0]["price"]
+        baseline = successful_results[0]["current_price"]
         for result in successful_results:
             result["relative_performance"] = round(
-                ((result["price"] - baseline) / baseline) * 100, 2
+                ((result["current_price"] - baseline) / baseline) * 100, 2
             )
     
     return {

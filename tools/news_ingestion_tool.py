@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from data_ingestion.auto_news_pipeline import auto_ingest_company_news
-from vector_store_manager import vector_store
+from vector_store_manager import final_vector_store
 from dotenv import load_dotenv
 import os
 
@@ -39,7 +39,7 @@ def ingest_company_news(company_query: str) -> dict:
     result = auto_ingest_company_news(
         company_query=company_query,
         news_api_key=NEWS_API_KEY,
-        existing_vector_store=vector_store
+        existing_vector_store=final_vector_store
     )
     
     # Format response based on status

@@ -2,6 +2,7 @@ import os
 from langgraph.graph import StateGraph, START
 from typing import TypedDict, Annotated
 from langgraph.graph.message import add_messages
+from langchain_community.tools import DuckDuckGoSearchRun
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage, AIMessage
@@ -9,7 +10,7 @@ from langchain_core.tools import tool
 from langgraph.prebuilt import ToolNode, tools_condition
 from dotenv import load_dotenv
 
-from vector_store_manager import vector_store
+from vector_store_manager import final_vector_store
 
 from tools.rag_tool import rag_tool, check_data_availability
 from tools.news_ingestion_tool import ingest_company_news
@@ -53,13 +54,15 @@ def clarify_company(company_query: str) -> dict:
     
     resolved, candidates = resolve_company(company_query, auto_select=False)
     
+    print(f"Clarifying company for query: {company_query}")
+    
     if resolved:
         return {
             "is_ambiguous": False,
             "company": resolved.canonical_name,
             "ticker": resolved.ticker,
             "sector": resolved.sector,
-            "message": f"Identified company: {resolved.canonical_name} ({resolved.ticker})"
+            "message": f"Identified company: {resolved.canonical_name}"
         }
     
     elif candidates:
@@ -87,9 +90,11 @@ def clarify_company(company_query: str) -> dict:
             "message": f"Could not find any company matching '{company_query}'"
         }
 
+search_tool = DuckDuckGoSearchRun(region="us-en")
 
 # Assemble all tools
 tools = [
+    search_tool,
     get_stock_price,
     compare_stock_prices,
     rag_tool,
