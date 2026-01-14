@@ -55,7 +55,7 @@ def ingest_news_into_vector_store(
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     
     for article in articles:
-        print(f"Processing article: {type(article)} - {article.get('title', 'No Title')}")
+        # print(f"Processing article: {type(article)} - {article.get('title', 'No Title')}")
         # Validate content
         full_text = article.get("full_content", "")
         
@@ -157,7 +157,7 @@ def auto_ingest_company_news(
             "company": canonical_name,
             "message": f"Failed to fetch news: {str(e)}"
         }
-    
+    print("Fetched articles:", len(articles))
     if not articles:
         return {
             "status": "no_news",

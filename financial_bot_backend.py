@@ -60,7 +60,6 @@ def clarify_company(company_query: str) -> dict:
         return {
             "is_ambiguous": False,
             "company": resolved.canonical_name,
-            "ticker": resolved.ticker,
             "sector": resolved.sector,
             "message": f"Identified company: {resolved.canonical_name}"
         }
@@ -70,7 +69,6 @@ def clarify_company(company_query: str) -> dict:
             {
                 "name": c.common_name,
                 "canonical_name": c.canonical_name,
-                "ticker": c.ticker,
                 "description": c.description,
                 "exchange": c.exchange
             }

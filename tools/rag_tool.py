@@ -3,7 +3,7 @@ from langchain_core.runnables import RunnableConfig
 from vector_store_manager import final_vector_store
 from typing import Optional
 from utils.company_resolver import resolve_company
-
+from typing import Optional, Literal
 
 def extract_company_from_query(query: str) -> Optional[str]:
     """
@@ -71,7 +71,11 @@ def build_metadata_filter(
 
 
 @tool
-def rag_tool(query: str, config: RunnableConfig) -> dict:
+def rag_tool(
+    query: str, 
+    config: RunnableConfig = None,
+    category : Literal["earnings_call", "news", "all"] = "all"
+    ) -> dict:
     """
     Enhanced RAG tool with company-aware retrieval.
     
@@ -89,11 +93,19 @@ def rag_tool(query: str, config: RunnableConfig) -> dict:
     
     print(f"Resolved company: {company_name}, Ticker: {ticker}")
     
-    # Step 2: Build smart filter
+    # Step 2: Determine data types based on category
+    if category == "news":
+        target_data_types = ["news"]
+    elif category == "earnings":
+        target_data_types = ["earnings_call"]
+    else:
+        target_data_types = ["earnings_call", "news"]
+    
+    # Step 3: Build smart filter
     filter_fn = build_metadata_filter(
         company_name=company_name,
         ticker=ticker,
-        data_types=["earnings_call", "news"],
+        data_types=target_data_types,
         thread_id=thread_id
     )
     

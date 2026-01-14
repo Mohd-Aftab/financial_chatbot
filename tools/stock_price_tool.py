@@ -170,6 +170,15 @@ def get_stock_price(
         else:
             df = ticker.history(period=period or "5d", interval="1d")
         
+        try:
+            # fast_info is usually faster/more reliable for basic metadata
+            currency = ticker.fast_info.currency
+        except:
+            try:
+                currency = ticker.info.get('currency', 'USD')
+            except:
+                currency = 'USD' # Fallback
+        
         
         if df.empty:
             return {

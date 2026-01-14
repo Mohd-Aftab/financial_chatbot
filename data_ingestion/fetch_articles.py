@@ -17,4 +17,5 @@ def fetch_company_news(company: str, api_key: str, days: int = 30):
 
     response = requests.get(url, params=params)
     response.raise_for_status()
+    print("Fetched articles:", len(response.json().get("articles", [])))
     return response.json()["articles"]
