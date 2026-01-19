@@ -179,7 +179,7 @@ def get_stock_price(
             except:
                 currency = 'USD' # Fallback
         
-        
+        print(df)
         if df.empty:
             return {
                 "error": "no_data",
