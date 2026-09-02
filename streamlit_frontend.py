@@ -11,7 +11,7 @@ from langchain_core.messages import (
 )
 
 from vector_store_manager import final_vector_store
-from utils.prompts import SYSTEM_PROMPT
+from utils.prompt2 import SYSTEM_PROMPT
 
 
 # ---------------- Custom CSS for Loader ----------------
@@ -65,6 +65,7 @@ def inject_system_prompt(thread_id: str):
 def reset_chat():
     thread_id = generate_thread_id()
     st.session_state.thread_id = thread_id
+    st.session_state["chat_thread"].append(thread_id)
     st.session_state.message_history = []
     inject_system_prompt(thread_id)
 

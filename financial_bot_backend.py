@@ -36,7 +36,6 @@ conn = sqlite3.connect(database="financebot.db", check_same_thread=False)
 checkpointer = SqliteSaver(conn=conn)
 
 
-# Helper tool for company disambiguation
 @tool
 def clarify_company(company_query: str) -> dict:
     """
@@ -90,7 +89,6 @@ def clarify_company(company_query: str) -> dict:
 
 search_tool = DuckDuckGoSearchRun(region="us-en")
 
-# Assemble all tools
 tools = [
     search_tool,
     get_stock_price,
@@ -122,7 +120,6 @@ graph.add_edge(START, "chat_node")
 graph.add_conditional_edges("chat_node", tools_condition)
 graph.add_edge("tools", "chat_node")
 
-# Compile graph
 chatbot = graph.compile(checkpointer=checkpointer)
 chatbot1 = graph.compile()  # Without checkpointing
 

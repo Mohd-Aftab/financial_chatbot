@@ -93,7 +93,6 @@ def rag_tool(
     
     print(f"Resolved company: {company_name}, Ticker: {ticker}")
     
-    # Step 2: Determine data types based on category
     if category == "news":
         target_data_types = ["news"]
     elif category == "earnings":
@@ -101,7 +100,6 @@ def rag_tool(
     else:
         target_data_types = ["earnings_call", "news"]
     
-    # Step 3: Build smart filter
     filter_fn = build_metadata_filter(
         company_name=company_name,
         ticker=ticker,
@@ -109,11 +107,10 @@ def rag_tool(
         thread_id=thread_id
     )
     
-    # Step 3: Retrieve with filtering
     retriever = final_vector_store.as_retriever(
         search_type="similarity",
         search_kwargs={
-            "k": 5,  # Increased from 4 to get more context
+            "k": 5,
             "filter": filter_fn
         }
     )
@@ -124,7 +121,6 @@ def rag_tool(
         print(f"Retrieval error: {e}")
         results = []
     
-    # Step 4: Validate and structure results
     if not results:
         return {
             "query": query,
@@ -134,7 +130,6 @@ def rag_tool(
             "warning": f"No data found for {company_name}. Vector store may not contain earnings calls or news for this company."
         }
     
-    # Step 5: Organize by data type for better context
     earnings_docs = []
     news_docs = []
     other_docs = []
@@ -186,7 +181,6 @@ def check_data_availability(company_name: str, config: RunnableConfig) -> dict:
     
     canonical_name = resolved.canonical_name
     
-    # Search for any documents related to this company
     filter_fn = build_metadata_filter(
         company_name=canonical_name,
         thread_id=thread_id
@@ -200,7 +194,6 @@ def check_data_availability(company_name: str, config: RunnableConfig) -> dict:
         }
     )
     
-    # Use a generic query to find any company documents
     test_query = f"{canonical_name} company information"
     
     try:
@@ -218,7 +211,6 @@ def check_data_availability(company_name: str, config: RunnableConfig) -> dict:
             "message": f"No data available for {canonical_name}. Consider ingesting news or earnings data first."
         }
     
-    # Count data types
     earnings_count = sum(1 for doc in results if doc.metadata.get("data_type") == "earnings_call")
     news_count = sum(1 for doc in results if doc.metadata.get("data_type") == "news")
     
