@@ -72,10 +72,6 @@ financial_chatbot/
 │   ├── parsed_date_format.py  # Relative/absolute date parsing
 │   └── prompt2.py             # System prompt used by Streamlit
 │
-├── evaluation/
-│   ├── deepeval_test.py       # RAG / answer quality eval
-│   └── test_case.json
-│
 ├── output_schemas/            # Pydantic helpers for ticker / company identity
 ├── earning_calls/             # Input PDFs (create this; not in git)
 └── faiss_index/               # Generated vector store (gitignored)
@@ -193,16 +189,6 @@ The system prompt instructs the model to:
 - Check `check_data_availability` before claiming earnings facts
 - Ingest news, then call `rag_tool` (never dump raw JSON to the user)
 - Use DuckDuckGo for lists, rankings, and general market questions — not for a single ticker’s price
-
----
-
-## Evaluation
-
-```bash
-python evaluation/deepeval_test.py
-```
-
-This runs the questions in `evaluation/test_case.json` through the live agent and scores them with DeepEval (`gpt-4o`): Faithfulness, Answer Relevancy, Contextual Relevancy (threshold 0.7). Each case uses a fresh LangGraph thread ID.
 
 ---
 

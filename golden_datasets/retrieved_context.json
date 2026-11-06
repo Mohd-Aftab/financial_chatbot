@@ -1,0 +1,241 @@
+[
+  {
+    "id": "tcpl-q2fy26-india-margins",
+    "case_type": "earnings",
+    "company": "Tata Consumer Products Limited",
+    "ticker": "TATACONSUM.NS",
+    "category": "earnings",
+    "gold_chunk_id": "46c47793-c77b-4dc3-a9d3-b2e04b76d841",
+    "source": {
+      "filename": "earning_calls\\Tata Consumer Products Limited\\TATACONSUM.NS_Q2_2026.pdf",
+      "page": 14
+    },
+    "input": "What did Tata Consumer's management say about India margins this quarter, and are they comfortable with that level?",
+    "gold_context": "the India EBIT margins, would you say the current margins have further upside or these are the \nmargins that you are comfortable working with? I'm looking at close to 10% EBIT this quarter. \nAnd I think your peak was about 12%, 13%. \nSunil D’souza: I'm not sure about the peak of 12%, 13%. Broadly, India margins, we are in the ballpark of \nwhere we should be. I would say EBITDA, we are roughly in the 15% margins for this quarter, \nand that's where we should operate.",
+    "claims": [
+      "An analyst put India EBIT at about 10% for the quarter and recalled a peak of about 12-13%.",
+      "Sunil D'Souza said he was not sure about that 12-13% peak.",
+      "He said India margins are in the ballpark of where they should be.",
+      "He said EBITDA margin was roughly 15% this quarter, and that is the level they should operate at."
+    ],
+    "expected_output": "Sunil D'Souza said India margins are about where they should be. EBITDA margin was roughly 15% this quarter, and he described that as the operating level. He did not confirm the analyst's recollection of a 12-13% EBIT peak.",
+    "required_tools": [
+      "check_data_availability",
+      "rag_tool"
+    ],
+    "allowed_tools": [
+      "check_data_availability",
+      "rag_tool",
+      "clarify_company"
+    ],
+    "forbidden_tools": [
+      "duckduckgo_search",
+      "get_stock_price",
+      "compare_stock_prices"
+    ],
+    "expected_args": {
+      "rag_tool": {
+        "category": "earnings"
+      }
+    }
+  },
+  {
+    "id": "tcs-fy25-revenue-margins",
+    "company": "Tata Consultancy Services Limited",
+    "ticker": "TCS.NS",
+    "gold_chunk_id": "060d6872-2bb5-4a63-9b23-c00ea3d2d3a1",
+    "source": {
+      "filename": "earning_calls\\Tata Consultancy Services Limited\\TCS.NS_Q4_2025.pdf",
+      "page": 1
+    },
+    "input": "How did TCS revenue and margins turn out for financial year 2025?",
+    "gold_context": "supported us over the past 57 years.  \nOur financial year 2025 revenue grew by 4.2% in constant currency. Our \noperating margin for the year came in at 24.3%. Our net margin was at 19%. \nComing to our more recent performance , our Q4 revenues grew  2.5% on a \nconstant currency basis. All major markets grew sequentially. Our record Q4 \nTCV of $12.2 billion  demonstrates our ability to gain market share. North \nAmerica TCV  reached an all -time high of $6.8 billion . BFSI TCV was $4",
+    "claims": [
+      "FY2025 revenue grew 4.2% in constant currency.",
+      "Operating margin for the year was 24.3%.",
+      "Net margin for the year was 19%."
+    ],
+    "expected_output": "For financial year 2025, TCS revenue grew 4.2% in constant currency. Operating margin for the year was 24.3%, and net margin was 19%.",
+    "required_tools": [
+      "check_data_availability",
+      "rag_tool"
+    ],
+    "allowed_tools": [
+      "check_data_availability",
+      "rag_tool",
+      "clarify_company"
+    ],
+    "forbidden_tools": [
+      "duckduckgo_search",
+      "get_stock_price",
+      "compare_stock_prices"
+    ],
+    "expected_args": {
+      "rag_tool": {
+        "category": "earnings"
+      }
+    },
+    "case_type": "earnings",
+    "category": "earnings"
+  },
+  {
+    "id": "tcs-q1fy26-revenue-deals",
+    "company": "Tata Consultancy Services Limited",
+    "ticker": "TCS.NS",
+    "gold_chunk_id": "e55e4f3b-501c-4652-b20e-e8638784aa56",
+    "source": {
+      "filename": "earning_calls\\Tata Consultancy Services Limited\\TCS.NS_Q1_2026.pdf",
+      "page": 2
+    },
+    "input": "What happened to TCS revenue and order bookings in Q1 FY26?",
+    "gold_context": "issues. We saw cost pressures in our customers causing previously \nunseen project pauses, deferrals and decision delays that result ed in \nless than expected revenue conversion. \nIn this backdrop, our quarterly revenue declined by 3.1% year-on-year \nin constant currency terms.  \nOur operating margin was 24.5% and the net margin was 20.1%.  \nOur total value of contracts signed in Q1 FY 26 was $9.4 billion, up \n13.2% year-on-year.",
+    "claims": [
+      "Quarterly revenue declined 3.1% year-on-year in constant currency.",
+      "Operating margin was 24.5% and net margin was 20.1%.",
+      "The value of contracts signed in Q1 FY26 was $9.4 billion, up 13.2% year-on-year."
+    ],
+    "expected_output": "In Q1 FY26, TCS quarterly revenue declined 3.1% year-on-year in constant currency. Operating margin was 24.5% and net margin was 20.1%. Contracts signed in the quarter were worth $9.4 billion, up 13.2% year-on-year.",
+    "required_tools": [
+      "check_data_availability",
+      "rag_tool"
+    ],
+    "allowed_tools": [
+      "check_data_availability",
+      "rag_tool",
+      "clarify_company"
+    ],
+    "forbidden_tools": [
+      "duckduckgo_search",
+      "get_stock_price",
+      "compare_stock_prices"
+    ],
+    "expected_args": {
+      "rag_tool": {
+        "category": "earnings"
+      }
+    },
+    "case_type": "earnings",
+    "category": "earnings"
+  },
+  {
+    "id": "tcs-q1fy26-cash-dividend",
+    "company": "Tata Consultancy Services Limited",
+    "ticker": "TCS.NS",
+    "gold_chunk_id": "7fe5fa17-584c-47e9-8d99-42faabf5e45a",
+    "source": {
+      "filename": "earning_calls\\Tata Consultancy Services Limited\\TCS.NS_Q1_2026.pdf",
+      "page": 4
+    },
+    "input": "What cash flow did TCS report, and what dividend did the board recommend?",
+    "gold_context": "Tata Consultancy Services Earnings Conference Call \nJuly 10, 2025, 19:00 hrs IST (09:30 hrs US ET) \n \n Page 4 of 28 \nOur accounts receivable was at 75 days DSO in dollar terms, up five \ndays Y-o-Y.  \nNet cash from operations was $1.5 billion, which is a cash conversion \nof 100.3% of net income. Free cash flow s were at $1.3 billion and \ninvested funds at the end of the period stood at $5.7 billion.  \nThe Board has recommended an interim dividend of ₹11 per share.",
+    "claims": [
+      "Accounts receivable was 75 days DSO in dollar terms, up five days year-on-year.",
+      "Net cash from operations was $1.5 billion, a 100.3% conversion of net income.",
+      "Free cash flow was $1.3 billion and invested funds stood at $5.7 billion.",
+      "The board recommended an interim dividend of ₹11 per share."
+    ],
+    "expected_output": "TCS reported accounts receivable of 75 days DSO in dollar terms, up five days year-on-year. Net cash from operations was $1.5 billion, equal to 100.3% of net income. Free cash flow was $1.3 billion, and invested funds were $5.7 billion. The board recommended an interim dividend of ₹11 per share.",
+    "required_tools": [
+      "check_data_availability",
+      "rag_tool"
+    ],
+    "allowed_tools": [
+      "check_data_availability",
+      "rag_tool",
+      "clarify_company"
+    ],
+    "forbidden_tools": [
+      "duckduckgo_search",
+      "get_stock_price",
+      "compare_stock_prices"
+    ],
+    "expected_args": {
+      "rag_tool": {
+        "category": "earnings"
+      }
+    },
+    "case_type": "earnings",
+    "category": "earnings"
+  },
+  {
+    "id": "tcpl-q2fy26-tea-coffee",
+    "company": "Tata Consumer Products Limited",
+    "ticker": "TATACONSUM.NS",
+    "gold_chunk_id": "d680e5ec-f274-4344-b8d3-8e7b6b79af3b",
+    "source": {
+      "filename": "earning_calls\\Tata Consumer Products Limited\\TATACONSUM.NS_Q2_2026.pdf",
+      "page": 3
+    },
+    "input": "How did Tata Consumer packaged beverages and coffee perform, and where do they want tea margins?",
+    "gold_context": "Tata Consumer Products Limited \n  November 03, 2025 \n \nPage 4 of 17 \n \n Next slide. In terms of business,  packaged beverages, 5% volume growth ; 12% revenue , \noverall margins have shown a healthy recovery. Broadly, tea margins, we have always \nmaintained, should be operating between the roughly 34% to 36%, 37% mark, and we are into \nthat ballpark now. \n Coffee, we continue our robust performance with a 56% growth.  India Foods, 11% volume,",
+    "claims": [
+      "Packaged beverages had 5% volume growth and 12% revenue growth.",
+      "Overall margins showed a healthy recovery.",
+      "Management said tea margins should operate around 34% to 37%, and they are in that range now.",
+      "Coffee grew 56%."
+    ],
+    "expected_output": "Tata Consumer packaged beverages grew 5% in volume and 12% in revenue, and overall margins recovered. Management said tea margins should operate roughly between 34% and 37%, and they are in that range now. Coffee grew 56%.",
+    "required_tools": [
+      "check_data_availability",
+      "rag_tool"
+    ],
+    "allowed_tools": [
+      "check_data_availability",
+      "rag_tool",
+      "clarify_company"
+    ],
+    "forbidden_tools": [
+      "duckduckgo_search",
+      "get_stock_price",
+      "compare_stock_prices"
+    ],
+    "expected_args": {
+      "rag_tool": {
+        "category": "earnings"
+      }
+    },
+    "case_type": "earnings",
+    "category": "earnings"
+  },
+  {
+    "id": "tcpl-q1fy26-foods-sampann",
+    "company": "Tata Consumer Products Limited",
+    "ticker": "TATACONSUM.NS",
+    "gold_chunk_id": "0af223e4-68fb-419b-ad61-ca23e78db462",
+    "source": {
+      "filename": "earning_calls\\Tata Consumer Products Limited\\TATACONSUM.NS_Q1_2026.pdf",
+      "page": 3
+    },
+    "input": "How did Tata Consumer foods, salt, and Sampann grow in the quarter?",
+    "gold_context": "In terms of Foods, we had a 6% volume growth, 14% revenue growth. Salt grew 13% with 5% \nvolume. Actually, we have achieved our highest -ever quarterly tonnage . Value -added salts \ncontinued their strong momentum, up 31%. Sampann has grown 27%. And most importantly \nhere, the recent launches in Sampann of dry fruits and cold pressed oil continued to build on \nthe growth momentum. And right now, we're tracking ARR of about INR200 crores.",
+    "claims": [
+      "Foods volume grew 6% and revenue grew 14%.",
+      "Salt grew 13% with 5% volume, and quarterly tonnage was the highest ever.",
+      "Value-added salts were up 31%.",
+      "Sampann grew 27%.",
+      "Dry fruits and cold pressed oil continued to grow, and the business was tracking an ARR of about INR200 crores."
+    ],
+    "expected_output": "Tata Consumer foods grew 6% in volume and 14% in revenue. Salt grew 13% with 5% volume and reached its highest quarterly tonnage. Value-added salts were up 31%, and Sampann grew 27%. Newer Sampann lines such as dry fruits and cold pressed oil kept growing, with the business tracking an ARR of about INR200 crores.",
+    "required_tools": [
+      "check_data_availability",
+      "rag_tool"
+    ],
+    "allowed_tools": [
+      "check_data_availability",
+      "rag_tool",
+      "clarify_company"
+    ],
+    "forbidden_tools": [
+      "duckduckgo_search",
+      "get_stock_price",
+      "compare_stock_prices"
+    ],
+    "expected_args": {
+      "rag_tool": {
+        "category": "earnings"
+      }
+    },
+    "case_type": "earnings",
+    "category": "earnings"
+  }
+]
